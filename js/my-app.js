@@ -244,151 +244,153 @@ outputInventory();
 
 
 var pictureSource;   // picture source
-      var destinationType; // sets the format of returned value
+var destinationType; // sets the format of returned value
 
-      // Wait for device API libraries to load
-      //
-      document.addEventListener("deviceready",onDeviceReady,false);
+// Wait for device API libraries to load
+//
+document.addEventListener("deviceready",onDeviceReady,false);
 
-      // device APIs are available
-      //
-      function onDeviceReady() {
-          pictureSource=navigator.camera.PictureSourceType;
-          destinationType=navigator.camera.DestinationType;
-      }
+// device APIs are available
+//
+function onDeviceReady() {
+    pictureSource=navigator.camera.PictureSourceType;
+    destinationType=navigator.camera.DestinationType;
+}
 
-      // Called when a photo is successfully retrieved
-      //
-      function onPhotoDataSuccess(imageData) {
-        // // Uncomment to view the base64-encoded image data
-        // // console.log(imageData);
+// Called when a photo is successfully retrieved
+//
+function onPhotoDataSuccess(imageData) {
+  // // Uncomment to view the base64-encoded image data
+  // // console.log(imageData);
 
-        // // Get image handle
-        // //
-        // var smallImage = document.getElementById('smallImage');
+  // // Get image handle
+  // //
+  // var smallImage = document.getElementById('smallImage');
 
-        // // Unhide image elements
-        // //
-        // smallImage.style.display = 'block';
+  // // Unhide image elements
+  // //
+  // smallImage.style.display = 'block';
 
-        // // Show the captured photo
-        // // The in-line CSS rules are used to resize the image
-        // //
-        // smallImage.src = imageData;
+  // // Show the captured photo
+  // // The in-line CSS rules are used to resize the image
+  // //
+  // smallImage.src = imageData;
 
-        movePic(imageData);
-      }
+  cropAndMovePic(imageData);
+}
 
-      // Called when a photo is successfully retrieved
-      //
-      function onPhotoURISuccess(imageURI) {
-        // Uncomment to view the image file URI
-        // console.log(imageURI);
+// Called when a photo is successfully retrieved
+//
+function onPhotoURISuccess(imageURI) {
+  // Uncomment to view the image file URI
+  // console.log(imageURI);
 
-        // Get image handle
-        //
-        var largeImage = document.getElementById('largeImage');
+  // Get image handle
+  //
+  var largeImage = document.getElementById('largeImage');
 
-        // Unhide image elements
-        //
-        largeImage.style.display = 'block';
+  // Unhide image elements
+  //
+  largeImage.style.display = 'block';
 
-        // Show the captured photo
-        // The in-line CSS rules are used to resize the image
-        //
-        largeImage.src = imageURI;
-      }
+  // Show the captured photo
+  // The in-line CSS rules are used to resize the image
+  //
+  largeImage.src = imageURI;
+}
 
-      // A button will call this function
-      //
-      function capturePhoto() {
-        // Take picture using device camera and retrieve image as base64-encoded string
-        navigator.camera.getPicture(onPhotoDataSuccess, onFail, { 
-          quality: 50,
-          destinationType: destinationType.FILE_URI, 
-          saveToPhotoAlbum: false,
-          targetWidth: 250,
-          targetHeight: 250,
-        });
-      }
+// A button will call this function
+//
+function capturePhoto() {
+  // Take picture using device camera and retrieve image as base64-encoded string
+  navigator.camera.getPicture(onPhotoDataSuccess, onFail, { 
+    quality: 50,
+    destinationType: destinationType.FILE_URI, 
+    saveToPhotoAlbum: false,
+    targetWidth: 250,
+    targetHeight: 250,
+  });
+}
 
-      // A button will call this function
-      //
-      function capturePhotoEdit() {
-        // Take picture using device camera, allow edit, and retrieve image as base64-encoded string
-        navigator.camera.getPicture(onPhotoDataSuccess, onFail, { quality: 20, allowEdit: true,
-          destinationType: destinationType.DATA_URL });
-      }
+// A button will call this function
+//
+function capturePhotoEdit() {
+  // Take picture using device camera, allow edit, and retrieve image as base64-encoded string
+  navigator.camera.getPicture(onPhotoDataSuccess, onFail, { quality: 20, allowEdit: true,
+    destinationType: destinationType.DATA_URL });
+}
 
-      // A button will call this function
-      //
-      function getPhoto(source) {
-        // Retrieve image file location from specified source
-        navigator.camera.getPicture(onPhotoURISuccess, onFail, { quality: 50,
-          destinationType: destinationType.FILE_URI,
-          sourceType: source });
-      }
+// A button will call this function
+//
+function getPhoto(source) {
+  // Retrieve image file location from specified source
+  navigator.camera.getPicture(onPhotoURISuccess, onFail, { quality: 50,
+    destinationType: destinationType.FILE_URI,
+    sourceType: source });
+}
 
-      // Called if something bad happens.
-      //
-      function onFail(message) {
-        
-      }
-
-
+// Called if something bad happens.
+//
+function onFail(message) {
+  
+}
 
 
 
-      var photoOriginFolder = '';
-      function movePic(fileUri){ 
-        filePath = fileUri.replace("file://", ""); 
-        var res = filePath.split("/");
-        var theStr = '';
-        var until = res.length - 2;
-        for (var i=1; i<until; i++) {
-          theStr+='/'+res[i];
-        }
-        theStr = 'file://' + theStr;
 
-        window.resolveLocalFileSystemURI(
-          fileUri,
-          function(fileEntry){
-                newFileUri  = theStr + '/files/';
-                oldFileUri  = fileUri;
-                fileName = fileEntry.fullPath.replace('/','');
 
-                window.resolveLocalFileSystemURI(newFileUri,
-                        function(dirEntry) {
-                            // move the pic to a new directory and rename it
-                            fileEntry.moveTo(dirEntry, fileName, successMove, resOnError);
+var photoOriginFolder = '';
+function cropAndMovePic(fileUri){ 
+  filePath = fileUri.replace("file://", ""); 
+  var res = filePath.split("/");
+  var theStr = '';
+  var until = res.length - 2;
+  for (var i=1; i<until; i++) {
+    theStr+='/'+res[i];
+  }
+  theStr = 'file://' + theStr;
 
-                            // change smallImage src to the new pic
-                            var smallImage = document.getElementById('smallImage');
-                            smallImage.style.display = 'block';
-                            smallImage.src = newFileUri+'/'+fileName;
+  plugins.crop(function success () {
+    cropFileUri = theStr + '/cache/cropped.jpg';
+    fileName = res[res.length-1];
 
-                            plugins.crop(function success () {
-                              alert('ok');
-                            }, function fail () {
-                              alert('gagal');
-                            }, newFileUri+'/'+fileName);
-                        },
-                        resOnError);
-          },
-          resOnError);
-      } 
+    window.resolveLocalFileSystemURI(
+      cropFileUri,
+      function(fileEntry){
+            newFileUri  = theStr + '/files/';
+            oldFileUri  = cropFileUri;
+            // fileName = fileEntry.fullPath.replace('/','');
 
-      //Callback function when the file has been moved successfully - inserting the complete path
-      function successMove(entry) {
-        // alert(entry.fullPath);
-          //Store imagepath in session for future use
-          // like to store it in database
-          // sessionStorage.setItem('imagepath', entry.fullPath);
-      }
+            window.resolveLocalFileSystemURI(newFileUri,
+                    function(dirEntry) {
+                        // move the pic to a new directory and rename it
+                        fileEntry.moveTo(dirEntry, fileName, successMove, resOnError);
 
-      function resOnError(error) {
-          // alert(error.code);
-      }
+                        // change smallImage src to the new pic
+                        var smallImage = document.getElementById('smallImage');
+                        smallImage.style.display = 'block';
+                        smallImage.src = newFileUri+'/'+fileName;
+                    },
+                    resOnError);
+      },
+      resOnError
+    );
+  }, function fail () {
+    // myApp.alert('gagal');
+  }, fileUri);
+} 
+
+//Callback function when the file has been moved successfully - inserting the complete path
+function successMove(entry) {
+  // alert(entry.fullPath);
+    //Store imagepath in session for future use
+    // like to store it in database
+    // sessionStorage.setItem('imagepath', entry.fullPath);
+}
+
+function resOnError(error) {
+    // alert(error.code);
+}
 
 
 
@@ -397,14 +399,14 @@ var pictureSource;   // picture source
 
 
 function isNumberKey(evt){
-          var charCode = (evt.which) ? evt.which : evt.keyCode
-          return !(charCode > 31 && (charCode < 48 || charCode > 57));
-      }
-      function numberWithCommas(x) {
-          //remove commas
-          retVal = x ? parseFloat(x.replace(/,/g, '')) : 0;
-          if (retVal==0) return '';
+    var charCode = (evt.which) ? evt.which : evt.keyCode
+    return !(charCode > 31 && (charCode < 48 || charCode > 57));
+}
+function numberWithCommas(x) {
+    //remove commas
+    retVal = x ? parseFloat(x.replace(/,/g, '')) : 0;
+    if (retVal==0) return '';
 
-          //apply formatting
-          return retVal.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-      }
+    //apply formatting
+    return retVal.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
