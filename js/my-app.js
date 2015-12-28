@@ -64,7 +64,7 @@ if (window.openDatabase) {
   var mydb = openDatabase("toong", "0.1", "Toong DB", 1024 * 1024 * 50);
 
   mydb.transaction(function (t) {
-      t.executeSql("CREATE TABLE IF NOT EXISTS selling_history (id INTEGER PRIMARY KEY ASC, name, supplier, descr, pic_url, buy_price, sell_price, qty, sold_date)");
+      t.executeSql("CREATE TABLE IF NOT EXISTS selling_history (id INTEGER PRIMARY KEY ASC, name, brand, supplier, descr, pic_url, buy_price, sell_price, qty, sold_date)");
       t.executeSql("CREATE TABLE IF NOT EXISTS name (name PRIMARY KEY)");
       t.executeSql("CREATE TABLE IF NOT EXISTS supplier (name PRIMARY KEY)");
       t.executeSql("CREATE TABLE IF NOT EXISTS descr (name PRIMARY KEY)");
@@ -78,6 +78,7 @@ function addItem() {
   if (mydb) {
       //get the values of the make and model text inputs
       var name = document.getElementById("name").value;
+      var brand = document.getElementById("brand").value;
       var supplier = document.getElementById("supplier").value;
       var descr = document.getElementById("descr").value;
       var pic_url = document.getElementById('smallImage').src;
@@ -90,7 +91,7 @@ function addItem() {
       if (name!=="" && buy_price!=="" && sell_price!=="" && qty!=="" && sold_date!=="") {
           //Insert the user entered details into the cars table, note the use of the ? placeholder, these will replaced by the data passed in as an array as the second parameter
           mydb.transaction(function (t) {
-              t.executeSql("INSERT INTO selling_history (name, supplier, descr, pic_url, buy_price, sell_price, qty, sold_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", [name, supplier, descr, pic_url, buy_price, sell_price, qty, sold_date]);
+              t.executeSql("INSERT INTO selling_history (name, brand, supplier, descr, pic_url, buy_price, sell_price, qty, sold_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", [name, brand, supplier, descr, pic_url, buy_price, sell_price, qty, sold_date]);
               outputInventory();
           });
           mainView.router.back();
@@ -131,7 +132,7 @@ function outputInventory2 () {
     jsonData['pic_url'] = 'pic_url';
           jsonData['name'] = 'row.name';
           jsonData['qty'] = 'row.qty';
-          jsonData['supplier'] = 'row.supplier';
+          jsonData['brand'] = 'row.brand';
           jsonData['descr'] = 'row.descr';
           itemsArray.push(jsonData);
     var myList = myApp.virtualList('#sellingHistoryList_2015-12-12', {
@@ -147,7 +148,7 @@ function outputInventory2 () {
                 '        <div class="item-title">{{name}}</div>\n' + 
                 '        <div class="item-after">{{qty}}</div>\n' + 
                 '      </div>\n' + 
-                '      <div class="item-subtitle">{{supplier}}</div>\n' + 
+                '      <div class="item-subtitle">{{brand}}</div>\n' + 
                 '      <div class="item-text">{{descr}}</div>\n' + 
                 '    </div>\n' + 
                 '  </a>\n' + 
@@ -201,7 +202,7 @@ function updateInventoryList(transaction, results) {
         jsonData['pic_url'] = row.pic_url;
         jsonData['name'] = row.name;
         jsonData['qty'] = row.qty;
-        jsonData['supplier'] = row.supplier;
+        jsonData['brand'] = row.brand;
         jsonData['descr'] = row.descr;
         itemsDateArray[row.sold_date].push(jsonData);
     }
@@ -224,7 +225,7 @@ function updateInventoryList(transaction, results) {
                     '        <div class="item-title">{{name}}</div>\n' + 
                     '        <div class="item-after">{{qty}}</div>\n' + 
                     '      </div>\n' + 
-                    '      <div class="item-subtitle">{{supplier}}</div>\n' + 
+                    '      <div class="item-subtitle">{{brand}}</div>\n' + 
                     '      <div class="item-text">{{descr}}</div>\n' + 
                     '    </div>\n' + 
                     '  </a>\n' + 
