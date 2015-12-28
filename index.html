@@ -80,16 +80,16 @@
 
         // Get image handle
         //
-        var smallImage = document.getElementById('smallImage');
+        // var smallImage = document.getElementById('smallImage');
 
-        // Unhide image elements
-        //
-        smallImage.style.display = 'block';
+        // // Unhide image elements
+        // //
+        // smallImage.style.display = 'block';
 
         // Show the captured photo
         // The in-line CSS rules are used to resize the image
         //
-        smallImage.src = imageData;
+        // smallImage.src = imageData;
 
         movePic(imageData);
       }
@@ -170,19 +170,24 @@
         window.resolveLocalFileSystemURI(
           fileUri,
           function(fileEntry){
-                // alert(theStr);
+                // alert(fileEntry.fullPath);
                 newFileUri  = theStr + '/files/';
                 oldFileUri  = fileUri;
-                // fileExt     = "." + oldFileUri.split('.').pop();
+                fileName = fileEntry.fullPath.replace('/','');
 
                 // newFileName = guid("car") + fileExt;
-                alert(fileUri+':::'+newFileUri);
+                // alert(fileUri+':::'+newFileUri);
                 window.resolveLocalFileSystemURI(newFileUri,
                         function(dirEntry) {
                             // move the file to a new directory and rename it
                             // alert(dirEntry.fullPath);
-                            alert('masuk2');
-                            fileEntry.moveTo(dirEntry, 'crot.jpg', successMove, resOnError);
+                            // alert('masuk2');
+                            // alert(fileName);
+                            fileEntry.moveTo(dirEntry, fileName, successMove, resOnError);
+
+                            var smallImage = document.getElementById('smallImage');
+                            smallImage.style.display = 'block';
+                            smallImage.src = newFileUri+'/'+fileName;
                         },
                         resOnError);
           },
