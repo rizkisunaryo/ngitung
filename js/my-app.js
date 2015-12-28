@@ -66,6 +66,7 @@ if (window.openDatabase) {
   mydb.transaction(function (t) {
       t.executeSql("CREATE TABLE IF NOT EXISTS selling_history (id INTEGER PRIMARY KEY ASC, name, brand, supplier, descr, pic_url, buy_price, sell_price, qty, sold_date)");
       t.executeSql("CREATE TABLE IF NOT EXISTS name (name PRIMARY KEY)");
+      t.executeSql("CREATE TABLE IF NOT EXISTS brand (name PRIMARY KEY)");
       t.executeSql("CREATE TABLE IF NOT EXISTS supplier (name PRIMARY KEY)");
       t.executeSql("CREATE TABLE IF NOT EXISTS descr (name PRIMARY KEY)");
   });
@@ -91,10 +92,14 @@ function addItem() {
       if (name!=="" && buy_price!=="" && sell_price!=="" && qty!=="" && sold_date!=="") {
           //Insert the user entered details into the cars table, note the use of the ? placeholder, these will replaced by the data passed in as an array as the second parameter
           mydb.transaction(function (t) {
-              t.executeSql("INSERT INTO selling_history (name, brand, supplier, descr, pic_url, buy_price, sell_price, qty, sold_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", [name, brand, supplier, descr, pic_url, buy_price, sell_price, qty, sold_date]);
+              t.executeSql("INSERT INTO selling_history (name, brand, supplier, descr, pic_url, buy_price, sell_price, qty, sold_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", [name, brand, supplier, descr, pic_url, buy_price, sell_price, qty, sold_date]);              
               outputInventory();
+              mainView.router.back();
+              t.executeSql("INSERT INTO name (name) VALUES (?)", [name]);
+              t.executeSql("INSERT INTO brand (name) VALUES (?)", [brand]);
+              t.executeSql("INSERT INTO supplier (name) VALUES (?)", [supplier]);
+              t.executeSql("INSERT INTO descr (name) VALUES (?)", [descr]);
           });
-          mainView.router.back();
       } else {
           myApp.alert("Data tidak lengkap!");
       }
@@ -112,6 +117,7 @@ function outputInventory() {
       //Get all the cars from the database with a select statement, set outputCarList as the callback function for the executeSql command
       mydb.transaction(function (t) {
           t.executeSql("SELECT * FROM selling_history ORDER BY sold_date ASC", [], updateInventoryList);
+          // t.executeSql("SELECT * FROM name", [], showNames);
       });
   } else {
       // alert("db not found, your browser does not support web sql!");
@@ -175,6 +181,13 @@ function outputInventory2 () {
                 '</li>',
         height:100
     });
+}
+
+function showNames (transaction, results) {
+  for (i=0; i<results.rows.length; i++) {
+    myApp.alert(results.rows.item(i).name);
+  }
+  // body...
 }
 
 function updateInventoryList(transaction, results) {
