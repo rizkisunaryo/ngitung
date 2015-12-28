@@ -22,6 +22,13 @@ myApp.onPageInit('about', function (page) {
     });
 });
 
+myApp.onPageInit('sell', function (page) {
+    // run createContentPage func after link was clicked
+    var calendarDefault = myApp.calendar({
+          input: '#sold_date',
+      });
+});
+
 // Generate dynamic page
 var dynamicPageIndex = 0;
 function createContentPage() {
