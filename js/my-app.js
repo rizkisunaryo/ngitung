@@ -410,15 +410,26 @@ function updateInventoryList(transaction, results) {
     var i;
     var theInnerHtml = '';
     var itemsDateArray = [];
+    var prevSoldDate = '';
+    var profitTotalPerDay = 0;
     for (i = 0; i < results.rows.length; i++) {
         var row = results.rows.item(i);
 
         if (typeof itemsDateArray[row.sold_date] === 'undefined') {
-            theInnerHtml += 
-                '<div class="content-block-title" id="sellingHistoryTitle_'+row.sold_date+'">'+row.sold_date+'</div>\n' + 
-                '<div class="list-block virtual-list media-list" id="sellingHistoryList_'+row.sold_date+'"></div>\n';
             itemsDateArray[row.sold_date] = [];
-        };
+        }
+
+        if (prevSoldDate!=row.sold_date && prevSoldDate!=='') {
+          theInnerHtml += 
+            '<div class="content-block-title" id="sellingHistoryTitle_'+prevSoldDate+'">'+prevSoldDate+' - '+profitTotalPerDay+'</div>\n' + 
+            '<div class="list-block virtual-list media-list" id="sellingHistoryList_'+prevSoldDate+'"></div>\n';
+
+          profitTotalPerDay = 0;
+        }
+        var buyPriceNum = Number(row.buy_price.split(',').join(''));
+        var sellPriceNum = Number(row.sell_price.split(',').join(''));
+        var profit = (sellPriceNum - buyPriceNum) * Number(row.qty);
+        profitTotalPerDay += profit;
 
         var jsonData = {};
         jsonData['id'] = row.id;
@@ -428,7 +439,13 @@ function updateInventoryList(transaction, results) {
         jsonData['brand'] = row.brand;
         jsonData['descr'] = row.descr;
         itemsDateArray[row.sold_date].push(jsonData);
+
+        prevSoldDate = row.sold_date;
     }
+    theInnerHtml += 
+      '<div class="content-block-title" id="sellingHistoryTitle_'+prevSoldDate+'">'+prevSoldDate+' - '+profitTotalPerDay+'</div>\n' + 
+      '<div class="list-block virtual-list media-list" id="sellingHistoryList_'+prevSoldDate+'"></div>\n';
+
     sellingHistoryContainer.innerHTML = theInnerHtml;
 
     for (var k in itemsDateArray){
