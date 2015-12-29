@@ -321,7 +321,7 @@ function loadSellEditPage (data) {
     '        </div>\n' + 
     '        <!-- <p><a href="#" class="button" onclick="capturePhoto();">Ambil gambar</a></p> -->\n' + 
     '        <br /><br />\n' + 
-    '        <a href="#" class="button button-big button-fill color-gray" style="background-color:grey;" onclick="editSelling('+data.id+');">Tambah penjualan</a>\n' + 
+    '        <a href="#" class="button button-big button-fill color-gray" style="background-color:grey;" onclick="editSelling('+data.id+');">Edit penjualan</a>\n' + 
     '      </div>\n' + 
     '    </div>\n' + 
     '  </div>\n' + 
@@ -331,7 +331,38 @@ function loadSellEditPage (data) {
 }
 
 function editSelling(id) {
-  // body...
+  //check to ensure the mydb object has been created
+  if (mydb) {
+      //get the values of the make and model text inputs
+      var name = document.getElementById("name").value;
+      var brand = document.getElementById("brand").value;
+      var supplier = document.getElementById("supplier").value;
+      var descr = document.getElementById("descr").value;
+      var pic_url = document.getElementById('smallImage').src;
+      var buy_price = document.getElementById("buy_price").value;
+      var sell_price = document.getElementById("sell_price").value;
+      var qty = document.getElementById("qty").value;
+      var sold_date = document.getElementById("sold_date").value;
+
+      //Test to ensure that the user has entered both a make and model
+      if (name!=="" && buy_price!=="" && sell_price!=="" && qty!=="" && sold_date!=="") {
+          //Insert the user entered details into the cars table, note the use of the ? placeholder, these will replaced by the data passed in as an array as the second parameter
+          mydb.transaction(function (t) {
+              t.executeSql("UPDATE selling_history SET name=?, brand=?, supplier=?, descr=?, pic_url=?, buy_price=?, sell_price=?, qty=?, sold_date=? WHERE id=?", [name, brand, supplier, descr, pic_url, buy_price, sell_price, qty, sold_date, id]);              
+              outputInventory();
+              mainView.router.back();
+              // t.executeSql("INSERT INTO name (name) VALUES (?)", [name]);
+              // t.executeSql("INSERT INTO brand (name) VALUES (?)", [brand]);
+              // t.executeSql("INSERT INTO supplier (name) VALUES (?)", [supplier]);
+              // t.executeSql("INSERT INTO descr (name) VALUES (?)", [descr]);
+          });
+      } else {
+          myApp.alert("Data tidak lengkap!");
+      }
+  } else {
+      myApp.alert("Browser Anda tidak mendukung WebSQL!");
+      mainView.router.back();
+  }
 }
 
 function showNames (transaction, results) {
@@ -509,16 +540,16 @@ function onFail(message) {
 
 var photoOriginFolder = '';
 function cropAndMovePic(fileUri){ 
-  filePath = fileUri.replace("file://", ""); 
-  var res = filePath.split("/");
-  var theStr = '';
-  var until = res.length - 2;
-  for (var i=1; i<until; i++) {
-    theStr+='/'+res[i];
-  }
-  theStr = 'file://' + theStr;
-
   plugins.crop(function success () {
+    filePath = fileUri.replace("file://", ""); 
+    var res = filePath.split("/");
+    var theStr = '';
+    var until = res.length - 2;
+    for (var i=1; i<until; i++) {
+      theStr+='/'+res[i];
+    }
+    theStr = 'file://' + theStr;
+
     cropFileUri = theStr + '/cache/cropped.jpg';
     fileName = res[res.length-1];
 
