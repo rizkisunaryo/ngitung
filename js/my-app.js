@@ -23,10 +23,24 @@ myApp.onPageInit('about', function (page) {
 });
 
 myApp.onPageInit('sell', function (page) {
-    // run createContentPage func after link was clicked
     var calendarDefault = myApp.calendar({
-          input: '#sold_date',
-      });
+        input: '#sold_date',
+    });
+
+    // var fruits = ('Apple Apricot Avocado Banana Melon Orange Peach Pear Pineapple').split(' ');
+    // var autocompleteDropdownAll = myApp.autocomplete({
+    //     input: '#name',
+    //     openIn: 'dropdown',
+    //     source: function (autocomplete, query, render) {
+    //         var results = [];
+    //         // Find matched items
+    //         for (var i = 0; i < fruits.length; i++) {
+    //             if (fruits[i].toLowerCase().indexOf(query.toLowerCase()) >= 0) results.push(fruits[i]);
+    //         }
+    //         // Render items by passing array with result items
+    //         render(results);
+    //     }
+    // });
 });
 
 // Generate dynamic page
@@ -65,16 +79,16 @@ if (window.openDatabase) {
 
   mydb.transaction(function (t) {
       t.executeSql("CREATE TABLE IF NOT EXISTS selling_history (id INTEGER PRIMARY KEY ASC, name, brand, supplier, descr, pic_url, buy_price, sell_price, qty, sold_date)");
-      t.executeSql("CREATE TABLE IF NOT EXISTS name (name PRIMARY KEY)");
-      t.executeSql("CREATE TABLE IF NOT EXISTS brand (name PRIMARY KEY)");
-      t.executeSql("CREATE TABLE IF NOT EXISTS supplier (name PRIMARY KEY)");
-      t.executeSql("CREATE TABLE IF NOT EXISTS descr (name PRIMARY KEY)");
+      // t.executeSql("CREATE TABLE IF NOT EXISTS name (name PRIMARY KEY)");
+      // t.executeSql("CREATE TABLE IF NOT EXISTS brand (name PRIMARY KEY)");
+      // t.executeSql("CREATE TABLE IF NOT EXISTS supplier (name PRIMARY KEY)");
+      // t.executeSql("CREATE TABLE IF NOT EXISTS descr (name PRIMARY KEY)");
   });
 } else {
   myApp.alert("Browser Anda tidak mendukung WebSQL!");
 }
 
-function addItem() {
+function addSelling() {
   //check to ensure the mydb object has been created
   if (mydb) {
       //get the values of the make and model text inputs
@@ -95,10 +109,10 @@ function addItem() {
               t.executeSql("INSERT INTO selling_history (name, brand, supplier, descr, pic_url, buy_price, sell_price, qty, sold_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", [name, brand, supplier, descr, pic_url, buy_price, sell_price, qty, sold_date]);              
               outputInventory();
               mainView.router.back();
-              t.executeSql("INSERT INTO name (name) VALUES (?)", [name]);
-              t.executeSql("INSERT INTO brand (name) VALUES (?)", [brand]);
-              t.executeSql("INSERT INTO supplier (name) VALUES (?)", [supplier]);
-              t.executeSql("INSERT INTO descr (name) VALUES (?)", [descr]);
+              // t.executeSql("INSERT INTO name (name) VALUES (?)", [name]);
+              // t.executeSql("INSERT INTO brand (name) VALUES (?)", [brand]);
+              // t.executeSql("INSERT INTO supplier (name) VALUES (?)", [supplier]);
+              // t.executeSql("INSERT INTO descr (name) VALUES (?)", [descr]);
           });
       } else {
           myApp.alert("Data tidak lengkap!");
@@ -135,19 +149,20 @@ function outputInventory2 () {
 
     var itemsArray = [];
     var jsonData = {};
+    jsonData['id'] = 'id';
     jsonData['pic_url'] = 'pic_url';
-          jsonData['name'] = 'row.name';
-          jsonData['qty'] = 'row.qty';
-          jsonData['brand'] = 'row.brand';
-          jsonData['descr'] = 'row.descr';
-          itemsArray.push(jsonData);
+    jsonData['name'] = 'row.name';
+    jsonData['qty'] = 'row.qty';
+    jsonData['brand'] = 'row.brand';
+    jsonData['descr'] = 'row.descr';
+    itemsArray.push(jsonData);
     var myList = myApp.virtualList('#sellingHistoryList_2015-12-12', {
         // Array with plain HTML items
         items: itemsArray,
         // Template 7 template to render each item
         template: 
         '<li style="height:100px;">\n' + 
-                '  <a href="#" class="item-link item-content">\n' + 
+                '  <a href="#" class="item-link item-content sell-edit" data-id="{{id}}">\n' + 
                 '    <div class="item-media"><img src="{{pic_url}}" height="80"></div>\n' + 
                 '    <div class="item-inner">\n' + 
                 '      <div class="item-title-row">\n' + 
@@ -174,13 +189,149 @@ function outputInventory2 () {
                 '        <div class="item-title">{{name}}</div>\n' + 
                 '        <div class="item-after">{{qty}}</div>\n' + 
                 '      </div>\n' + 
-                '      <div class="item-subtitle">{{supplier}}</div>\n' + 
+                '      <div class="item-subtitle">{{brand}}</div>\n' + 
                 '      <div class="item-text">{{descr}}</div>\n' + 
                 '    </div>\n' + 
                 '  </a>\n' + 
                 '</li>',
         height:100
     });
+
+    $$('.sell-edit').on('click', function () {
+      loadSellEdit($$(this).data('id'));
+    });
+}
+
+function loadSellEdit(id) {
+  if (mydb) {
+      //Get all the cars from the database with a select statement, set outputCarList as the callback function for the executeSql command
+      mydb.transaction(function (t) {
+          t.executeSql("SELECT * FROM selling_history WHERE id=?", [id], function (transaction, results) {
+            if (results.rows.length>=1) {
+              loadSellEditPage(results.rows.item(0));
+            }
+          });
+          // t.executeSql("SELECT * FROM name", [], showNames);
+      });
+  } else {
+      var data = {};
+      data['id']=1;
+      data['sold_date']='2015-12-12';
+      data['name']='Sepatu';
+      loadSellEditPage(data);
+  }
+}
+
+function loadSellEditPage (data) {
+  mainView.router.loadContent(
+    '<!-- Top Navbar-->\n' + 
+    '<div class="navbar">\n' + 
+    '  <div class="navbar-inner">\n' + 
+    '    <div class="left"><a href="#" class="back link" id="sellBack"> <i class="icon icon-back"></i><span>Back</span></a></div>\n' + 
+    '    <div class="center sliding">Jual</div>\n' + 
+    '    <div class="right">\n' + 
+    '      <a href="#" class="link icon-only open-panel"> <i class="icon icon-bars"></i></a>\n' + 
+    '    </div>\n' + 
+    '  </div>\n' + 
+    '</div>\n' + 
+    '<div class="pages">\n' + 
+    '  <!-- Page, data-page contains page name-->\n' + 
+    '  <div data-page="sell" class="page">\n' + 
+    '    <!-- Scrollable page content-->\n' + 
+    '    <div class="page-content">\n' + 
+    '      <div class="content-block">\n' + 
+    '        <div class="list-block">\n' + 
+    '          <ul>\n' + 
+    '            <li>\n' + 
+    '              <div class="item-content">\n' + 
+    '                <div class="item-inner">\n' + 
+    '                  <div class="item-input">\n' + 
+    '                    <input type="text" placeholder="Tanggal penjualan" readonly id="sold_date" value="'+data.sold_date+'">\n' + 
+    '                  </div>\n' + 
+    '                </div>\n' + 
+    '              </div>\n' + 
+    '            </li>\n' + 
+    '            <li>\n' + 
+    '              <div class="item-content">\n' + 
+    '                <div class="item-inner">\n' + 
+    '                  <div class="item-input">\n' + 
+    '                    <input type="text" placeholder="Nama barang" id="name" value="'+data.name+'">\n' + 
+    '                  </div>\n' + 
+    '                </div>\n' + 
+    '              </div>\n' + 
+    '            </li>\n' + 
+    '            <li>\n' + 
+    '              <div class="item-content">\n' + 
+    '                <div class="item-inner">\n' + 
+    '                  <div class="item-input">\n' + 
+    '                    <input type="text" placeholder="Merk" id="brand" value="'+data.brand+'">\n' + 
+    '                  </div>\n' + 
+    '                </div>\n' + 
+    '              </div>\n' + 
+    '            </li>\n' + 
+    '            <li>\n' + 
+    '              <div class="item-content">\n' + 
+    '                <div class="item-inner">\n' + 
+    '                  <div class="item-input">\n' + 
+    '                    <input type="text" placeholder="Supplier" id="supplier" value="'+data.supplier+'">\n' + 
+    '                  </div>\n' + 
+    '                </div>\n' + 
+    '              </div>\n' + 
+    '            </li>\n' + 
+    '            <li>\n' + 
+    '              <div class="item-content">\n' + 
+    '                <div class="item-inner">\n' + 
+    '                  <div class="item-input">\n' + 
+    '                    <input type="text" placeholder="Keterangan" id="descr" value="'+data.descr+'">\n' + 
+    '                  </div>\n' + 
+    '                </div>\n' + 
+    '              </div>\n' + 
+    '            </li>\n' + 
+    '            <li>\n' + 
+    '              <div class="item-content">\n' + 
+    '                <div class="item-inner">\n' + 
+    '                  <div class="item-input">\n' + 
+    '                    <input type="text" placeholder="Harga beli per unit" onkeypress="return isNumberKey(event);" onkeyup="this.value=numberWithCommas(this.value);" id="buy_price" value="'+data.buy_price+'">\n' + 
+    '                  </div>\n' + 
+    '                </div>\n' + 
+    '              </div>\n' + 
+    '            </li>\n' + 
+    '            <li>\n' + 
+    '              <div class="item-content">\n' + 
+    '                <div class="item-inner">\n' + 
+    '                  <div class="item-input">\n' + 
+    '                    <input type="text" placeholder="Harga jual per unit" onkeypress="return isNumberKey(event);" onkeyup="this.value=numberWithCommas(this.value);" id="sell_price" value="'+data.sell_price+'">\n' + 
+    '                  </div>\n' + 
+    '                </div>\n' + 
+    '              </div>\n' + 
+    '            </li>\n' + 
+    '            <li>\n' + 
+    '              <div class="item-content">\n' + 
+    '                <div class="item-inner">\n' + 
+    '                  <div class="item-input">\n' + 
+    '                    <input type="text" placeholder="Jumlah terjual" onkeypress="return isNumberKey(event);" onkeyup="this.value=numberWithCommas(this.value);" id="qty" value="'+data.qty+'">\n' + 
+    '                  </div>\n' + 
+    '                </div>\n' + 
+    '              </div>\n' + 
+    '            </li>\n' + 
+    '          </ul>\n' + 
+    '        </div>\n' + 
+    '        <div class="img-wrapper" onclick="capturePhoto();">\n' + 
+    '            <img id="smallImage" src="'+data.pic_url+'">\n' + 
+    '        </div>\n' + 
+    '        <!-- <p><a href="#" class="button" onclick="capturePhoto();">Ambil gambar</a></p> -->\n' + 
+    '        <br /><br />\n' + 
+    '        <a href="#" class="button button-big button-fill color-gray" style="background-color:grey;" onclick="editSelling('+data.id+');">Tambah penjualan</a>\n' + 
+    '      </div>\n' + 
+    '    </div>\n' + 
+    '  </div>\n' + 
+    '</div>\n'
+  );
+  return;
+}
+
+function editSelling(id) {
+  // body...
 }
 
 function showNames (transaction, results) {
@@ -212,6 +363,7 @@ function updateInventoryList(transaction, results) {
         };
 
         var jsonData = {};
+        jsonData['id'] = row.id;
         jsonData['pic_url'] = row.pic_url;
         jsonData['name'] = row.name;
         jsonData['qty'] = row.qty;
@@ -231,7 +383,7 @@ function updateInventoryList(transaction, results) {
             // Template 7 template to render each item
             template: 
             '<li style="height:100px;">\n' + 
-                    '  <a href="#" class="item-link item-content">\n' + 
+                    '  <a href="#" class="item-link item-content sell-edit" data-id="{{id}}">\n' + 
                     '    <div class="item-media"><img src="{{pic_url}}" height="80"></div>\n' + 
                     '    <div class="item-inner">\n' + 
                     '      <div class="item-title-row">\n' + 
@@ -246,6 +398,10 @@ function updateInventoryList(transaction, results) {
             height:100
         });
     }
+
+    $$('.sell-edit').on('click', function () {
+      loadSellEdit($$(this).data('id'));
+    });
   }
 }
 
@@ -289,7 +445,6 @@ function onPhotoDataSuccess(imageData) {
   // // The in-line CSS rules are used to resize the image
   // //
   // smallImage.src = imageData;
-
   cropAndMovePic(imageData);
 }
 
@@ -321,8 +476,7 @@ function capturePhoto() {
     quality: 50,
     destinationType: destinationType.FILE_URI, 
     saveToPhotoAlbum: false,
-    targetWidth: 250,
-    targetHeight: 250,
+    // allowEdit: true
   });
 }
 
@@ -384,6 +538,7 @@ function cropAndMovePic(fileUri){
                         var smallImage = document.getElementById('smallImage');
                         smallImage.style.display = 'block';
                         smallImage.src = newFileUri+'/'+fileName;
+                        // alert(newFileUri+'/'+fileName);
                     },
                     resOnError);
       },
@@ -424,3 +579,6 @@ function numberWithCommas(x) {
     //apply formatting
     return retVal.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
+
+
+
