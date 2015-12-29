@@ -321,7 +321,15 @@ function loadSellEditPage (data) {
     '        </div>\n' + 
     '        <!-- <p><a href="#" class="button" onclick="capturePhoto();">Ambil gambar</a></p> -->\n' + 
     '        <br /><br />\n' + 
-    '        <a href="#" class="button button-big button-fill color-gray" style="background-color:grey;" onclick="editSelling('+data.id+');">Edit penjualan</a>\n' + 
+    '        <div class="row">\n' + 
+    '          <div class="col-50">\n' + 
+    '            <a href="#" class="button button-big button-fill color-gray" style="background-color:red;" onclick="delSelling('+data.id+');">Hapus</a>\n' + 
+    '          </div>\n' + 
+    '          <div class="col-50">\n' + 
+    '            <a href="#" class="button button-big button-fill color-gray" style="background-color:grey;" onclick="editSelling('+data.id+');">Edit</a>\n' + 
+    '          </div>\n' + 
+    '        </div>\n' + 
+    // '        <a href="#" class="button button-big button-fill color-gray" style="background-color:grey;" onclick="editSelling('+data.id+');">Edit penjualan</a>\n' + 
     '      </div>\n' + 
     '    </div>\n' + 
     '  </div>\n' + 
@@ -365,6 +373,24 @@ function editSelling(id) {
   }
 }
 
+function delSelling(id) {
+  //check to ensure the mydb object has been created
+  if (mydb) {
+    mydb.transaction(function (t) {
+        t.executeSql("DELETE FROM selling_history WHERE id=?", [id]);
+        outputInventory();
+        mainView.router.back();
+        // t.executeSql("INSERT INTO name (name) VALUES (?)", [name]);
+        // t.executeSql("INSERT INTO brand (name) VALUES (?)", [brand]);
+        // t.executeSql("INSERT INTO supplier (name) VALUES (?)", [supplier]);
+        // t.executeSql("INSERT INTO descr (name) VALUES (?)", [descr]);
+    });
+  } else {
+      myApp.alert("Browser Anda tidak mendukung WebSQL!");
+      mainView.router.back();
+  }
+}
+
 function showNames (transaction, results) {
   for (i=0; i<results.rows.length; i++) {
     myApp.alert(results.rows.item(i).name);
@@ -375,7 +401,8 @@ function showNames (transaction, results) {
 function updateInventoryList(transaction, results) {
   if (results.rows.length < 1) {
     document.getElementById('welcomeMessage').innerHTML = '<p>Anda belum mencatat penjualan apapun. Klik tombol di atas untuk mencatat penjualan.</p>';
-    var myList = myApp.virtualList('#sellingHistoryList', {items: ['']});
+    var sellingHistoryContainer = document.getElementById('sellingHistoryContainer');
+    sellingHistoryContainer.innerHTML = '';
   } else {
     document.getElementById('welcomeMessage').innerHTML = '';
 
