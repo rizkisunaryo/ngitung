@@ -13,6 +13,8 @@ var mainView = myApp.addView('.view-main', {
     dynamicNavbar: true
 });
 
+
+
 // Callbacks to run specific code for specific pages, for example for About page:
 myApp.onPageInit('about', function (page) {
     // run createContentPage func after link was clicked
@@ -26,21 +28,6 @@ myApp.onPageInit('sell', function (page) {
     var calendarDefault = myApp.calendar({
         input: '#sold_date',
     });
-
-    // var fruits = ('Apple Apricot Avocado Banana Melon Orange Peach Pear Pineapple').split(' ');
-    // var autocompleteDropdownAll = myApp.autocomplete({
-    //     input: '#name',
-    //     openIn: 'dropdown',
-    //     source: function (autocomplete, query, render) {
-    //         var results = [];
-    //         // Find matched items
-    //         for (var i = 0; i < fruits.length; i++) {
-    //             if (fruits[i].toLowerCase().indexOf(query.toLowerCase()) >= 0) results.push(fruits[i]);
-    //         }
-    //         // Render items by passing array with result items
-    //         render(results);
-    //     }
-    // });
 });
 
 // Generate dynamic page
@@ -75,10 +62,11 @@ function createContentPage() {
 
 
 if (window.openDatabase) {
-  var mydb = openDatabase("toong", "0.1", "Toong DB", 1024 * 1024 * 50);
+  var mydb = openDatabase("ngitung", "0.1", "Ngitung DB", 1024 * 1024 * 50);
 
   mydb.transaction(function (t) {
       t.executeSql("CREATE TABLE IF NOT EXISTS selling_history (id INTEGER PRIMARY KEY ASC, name, brand, supplier, descr, pic_url, buy_price, sell_price, qty, sold_date)");
+      // t.executeSql("INSERT INTO selling_history (name, brand, supplier, descr, pic_url, buy_price, sell_price, qty, sold_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", ['name', 'brand', 'supplier', 'descr', 'pic_url', '10,000', '20,000', '3', '2015-12-12']);
       // t.executeSql("CREATE TABLE IF NOT EXISTS name (name PRIMARY KEY)");
       // t.executeSql("CREATE TABLE IF NOT EXISTS brand (name PRIMARY KEY)");
       // t.executeSql("CREATE TABLE IF NOT EXISTS supplier (name PRIMARY KEY)");
@@ -131,6 +119,28 @@ function outputInventory() {
       //Get all the cars from the database with a select statement, set outputCarList as the callback function for the executeSql command
       mydb.transaction(function (t) {
           t.executeSql("SELECT * FROM selling_history ORDER BY sold_date ASC", [], updateInventoryList);
+          // t.executeSql("SELECT * FROM name", [], showNames);
+      });
+  } else {
+      // alert("db not found, your browser does not support web sql!");
+      outputInventory2();
+  }
+}
+
+function outputInventoryWithDate(fromDate,toDate) {
+  //check to ensure the mydb object has been created
+  if (mydb) {
+      //Get all the cars from the database with a select statement, set outputCarList as the callback function for the executeSql command
+      mydb.transaction(function (t) {
+          sqlStr = "SELECT * FROM selling_history WHERE 1 ";
+          if (fromDate!=='') {
+            sqlStr += "AND sold_date>='"+fromDate+"' "
+          }
+          if (toDate!=='') {
+            sqlStr += "AND sold_date<='"+toDate+"' "
+          }
+          sqlStr += "ORDER BY sold_date ASC ";
+          t.executeSql(sqlStr, [], updateInventoryList);
           // t.executeSql("SELECT * FROM name", [], showNames);
       });
   } else {
@@ -400,7 +410,20 @@ function showNames (transaction, results) {
 
 function updateInventoryList(transaction, results) {
   if (results.rows.length < 1) {
-    document.getElementById('welcomeMessage').innerHTML = '<p>Anda belum mencatat penjualan apapun. Klik tombol di atas untuk mencatat penjualan.</p>';
+    var fromDateFilter = document.getElementById('from_date').value;
+    var toDateFilter = document.getElementById('to_date').value;
+    if (fromDateFilter==='' && toDateFilter==='') {
+      document.getElementById('welcomeMessage').innerHTML = '<p>Anda belum mencatat penjualan apapun. Klik tombol di bawah untuk mencatat penjualan.</p>';
+    } else {
+      var theInnerHtml2 = 'Tidak ada data penjualan';
+      if (fromDateFilter!=='') {
+        theInnerHtml2 += ' dari ' + getFormattedDate(fromDateFilter);
+      }
+      if (toDateFilter!=='') {
+        theInnerHtml2 += ' sampai ' + getFormattedDate(toDateFilter);
+      }
+      document.getElementById('welcomeMessage').innerHTML = '<p>'+theInnerHtml2+'.</p>';
+    }
     var sellingHistoryContainer = document.getElementById('sellingHistoryContainer');
     sellingHistoryContainer.innerHTML = '';
   } else {
