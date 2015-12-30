@@ -421,7 +421,7 @@ function updateInventoryList(transaction, results) {
 
         if (prevSoldDate!=row.sold_date && prevSoldDate!=='') {
           theInnerHtml += 
-            '<div class="content-block-title" id="sellingHistoryTitle_'+prevSoldDate+'">'+prevSoldDate+' - '+profitTotalPerDay+'</div>\n' + 
+            '<div class="content-block-title" id="sellingHistoryTitle_'+prevSoldDate+'">'+getFormattedDate(prevSoldDate)+'<br />'+numberWithCommas(profitTotalPerDay.toString())+'</div>\n' + 
             '<div class="list-block virtual-list media-list" id="sellingHistoryList_'+prevSoldDate+'"></div>\n';
 
           profitTotalPerDay = 0;
@@ -443,7 +443,7 @@ function updateInventoryList(transaction, results) {
         prevSoldDate = row.sold_date;
     }
     theInnerHtml += 
-      '<div class="content-block-title" id="sellingHistoryTitle_'+prevSoldDate+'">'+prevSoldDate+' - '+profitTotalPerDay+'</div>\n' + 
+      '<div class="content-block-title" id="sellingHistoryTitle_'+prevSoldDate+'">'+getFormattedDate(prevSoldDate)+'<br />'+numberWithCommas(profitTotalPerDay.toString())+'</div>\n' + 
       '<div class="list-block virtual-list media-list" id="sellingHistoryList_'+prevSoldDate+'"></div>\n';
 
     sellingHistoryContainer.innerHTML = theInnerHtml;
@@ -657,3 +657,78 @@ function numberWithCommas(x) {
 
 
 
+function getFormattedDate(dateYmd) {
+  var d = new Date(dateYmd);
+
+  var day = d.getDay();
+  var date = d.getDate();
+  var month = d.getMonth();
+  var year = d.getFullYear();
+
+  var dayStr = '';
+  switch (day) {
+      case 0:
+          dayStr = "Minggu";
+          break;
+      case 1:
+          dayStr = "Senin";
+          break;
+      case 2:
+          dayStr = "Selasa";
+          break;
+      case 3:
+          dayStr = "Rabu";
+          break;
+      case 4:
+          dayStr = "Kamis";
+          break;
+      case 5:
+          dayStr = "Jum'at";
+          break;
+      case 6:
+          dayStr = "Sabtu";
+          break;
+  } 
+
+  var monthStr = '';
+  switch (month) {
+    case 0:
+      monthStr = 'Januari';
+      break;
+    case 1:
+      monthStr = 'Februari';
+      break;
+    case 2:
+      monthStr = 'Maret';
+      break;
+    case 3:
+      monthStr = 'April';
+      break;
+    case 4:
+      monthStr = 'Mei';
+      break;
+    case 5:
+      monthStr = 'Juni';
+      break;
+    case 6:
+      monthStr = 'Juli';
+      break;
+    case 7:
+      monthStr = 'Agustus';
+      break;
+    case 8:
+      monthStr = 'September';
+      break;
+    case 9:
+      monthStr = 'Oktober';
+      break;
+    case 10:
+      monthStr = 'November';
+      break;
+    case 11:
+      monthStr = 'Desember';
+      break;
+  }
+
+  return dayStr+', '+date+' '+monthStr+' '+year;
+}
