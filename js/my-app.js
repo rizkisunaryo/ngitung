@@ -1,6 +1,6 @@
 // Initialize your app
 var myApp = new Framework7({
-    swipePanel: 'left',
+    // swipePanel: 'left',
     modalTitle: 'Ngitung',
 });
 
@@ -66,7 +66,7 @@ if (window.openDatabase) {
 
   mydb.transaction(function (t) {
       t.executeSql("CREATE TABLE IF NOT EXISTS selling_history (id INTEGER PRIMARY KEY ASC, name, brand, supplier, descr, pic_url, buy_price, sell_price, qty, sold_date)");
-      // t.executeSql("INSERT INTO selling_history (name, brand, supplier, descr, pic_url, buy_price, sell_price, qty, sold_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", ['name', 'brand', 'supplier', 'descr', 'pic_url', '10,000', '20,000', '3', '2015-12-12']);
+      // t.executeSql("INSERT INTO selling_history (name, brand, supplier, descr, pic_url, buy_price, sell_price, qty, sold_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", ['name', 'brand', 'supplier', 'descr', 'pic_url', '10,000', '20,000', '3', '2015-11-12']);
       // t.executeSql("CREATE TABLE IF NOT EXISTS name (name PRIMARY KEY)");
       // t.executeSql("CREATE TABLE IF NOT EXISTS brand (name PRIMARY KEY)");
       // t.executeSql("CREATE TABLE IF NOT EXISTS supplier (name PRIMARY KEY)");
