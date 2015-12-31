@@ -28,6 +28,42 @@ myApp.onPageInit('sell', function (page) {
     var calendarDefault = myApp.calendar({
         input: '#sold_date',
     });
+
+    //check to ensure the mydb object has been created
+    if (mydb) {
+        //Get all the cars from the database with a select statement, set outputCarList as the callback function for the executeSql command
+        mydb.transaction(function (t) {
+            t.executeSql("SELECT * FROM name", [], function (transaction, results) {
+              var availableTags = [];
+              for (i=0; i<results.rows.length; i++) 
+                availableTags.push(results.rows.item(i).name);
+              $( "#name" ).autocomplete({
+                delay: 0,
+                source: availableTags
+              });
+            });
+
+            t.executeSql("SELECT * FROM brand", [], function (transaction, results) {
+              var availableTags = [];
+              for (i=0; i<results.rows.length; i++) 
+                availableTags.push(results.rows.item(i).name);
+              $( "#brand" ).autocomplete({
+                delay: 0,
+                source: availableTags
+              });
+            });
+
+            t.executeSql("SELECT * FROM supplier", [], function (transaction, results) {
+              var availableTags = [];
+              for (i=0; i<results.rows.length; i++) 
+                availableTags.push(results.rows.item(i).name);
+              $( "#supplier" ).autocomplete({
+                delay: 0,
+                source: availableTags
+              });
+            });
+        });
+    } 
 });
 
 // Generate dynamic page
@@ -67,9 +103,9 @@ if (window.openDatabase) {
   mydb.transaction(function (t) {
       t.executeSql("CREATE TABLE IF NOT EXISTS selling_history (id INTEGER PRIMARY KEY ASC, name, brand, supplier, descr, pic_url, buy_price, sell_price, qty, sold_date)");
       // t.executeSql("INSERT INTO selling_history (name, brand, supplier, descr, pic_url, buy_price, sell_price, qty, sold_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", ['name', 'brand', 'supplier', 'descr', 'pic_url', '10,000', '20,000', '3', '2015-11-12']);
-      // t.executeSql("CREATE TABLE IF NOT EXISTS name (name PRIMARY KEY)");
-      // t.executeSql("CREATE TABLE IF NOT EXISTS brand (name PRIMARY KEY)");
-      // t.executeSql("CREATE TABLE IF NOT EXISTS supplier (name PRIMARY KEY)");
+      t.executeSql("CREATE TABLE IF NOT EXISTS name (name PRIMARY KEY)");
+      t.executeSql("CREATE TABLE IF NOT EXISTS brand (name PRIMARY KEY)");
+      t.executeSql("CREATE TABLE IF NOT EXISTS supplier (name PRIMARY KEY)");
       // t.executeSql("CREATE TABLE IF NOT EXISTS descr (name PRIMARY KEY)");
   });
 } else {
@@ -97,9 +133,9 @@ function addSelling() {
               t.executeSql("INSERT INTO selling_history (name, brand, supplier, descr, pic_url, buy_price, sell_price, qty, sold_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", [name, brand, supplier, descr, pic_url, buy_price, sell_price, qty, sold_date]);              
               outputInventory();
               mainView.router.back();
-              // t.executeSql("INSERT INTO name (name) VALUES (?)", [name]);
-              // t.executeSql("INSERT INTO brand (name) VALUES (?)", [brand]);
-              // t.executeSql("INSERT INTO supplier (name) VALUES (?)", [supplier]);
+              t.executeSql("INSERT INTO name (name) VALUES (?)", [name]);
+              t.executeSql("INSERT INTO brand (name) VALUES (?)", [brand]);
+              t.executeSql("INSERT INTO supplier (name) VALUES (?)", [supplier]);
               // t.executeSql("INSERT INTO descr (name) VALUES (?)", [descr]);
           });
       } else {
@@ -369,9 +405,9 @@ function editSelling(id) {
               t.executeSql("UPDATE selling_history SET name=?, brand=?, supplier=?, descr=?, pic_url=?, buy_price=?, sell_price=?, qty=?, sold_date=? WHERE id=?", [name, brand, supplier, descr, pic_url, buy_price, sell_price, qty, sold_date, id]);              
               outputInventory();
               mainView.router.back();
-              // t.executeSql("INSERT INTO name (name) VALUES (?)", [name]);
-              // t.executeSql("INSERT INTO brand (name) VALUES (?)", [brand]);
-              // t.executeSql("INSERT INTO supplier (name) VALUES (?)", [supplier]);
+              t.executeSql("INSERT INTO name (name) VALUES (?)", [name]);
+              t.executeSql("INSERT INTO brand (name) VALUES (?)", [brand]);
+              t.executeSql("INSERT INTO supplier (name) VALUES (?)", [supplier]);
               // t.executeSql("INSERT INTO descr (name) VALUES (?)", [descr]);
           });
       } else {

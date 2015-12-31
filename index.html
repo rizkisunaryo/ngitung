@@ -9,6 +9,7 @@
     <!-- Path to Framework7 Library CSS-->
     <link rel="stylesheet" href="css/framework7.ios.min.css">
     <link rel="stylesheet" href="css/framework7.ios.colors.min.css">
+    <link rel="stylesheet" type="text/css" href="plugins/jquery-ui-1.11.4/jquery-ui.css">
     <!-- Path to your custom app styles-->
     <link rel="stylesheet" href="css/my-app.css">
     <style type="text/css">
@@ -36,6 +37,15 @@
           top:-100%; left:0; right: 0; bottom:-100%;
           /*margin: auto;*/
           width: 80px;
+      }
+
+      .ui-autocomplete {
+        position: relative;
+        z-index: 10000;
+      }
+
+      .ui-widget {
+          font-size: 1.2em;
       }
     </style>
     <script type="text/javascript" src="js/jquery-1.11.3.min.js"></script>
@@ -112,6 +122,7 @@
     </div>
     <!-- Path to Framework7 Library JS-->
     <script type="text/javascript" src="js/framework7.min.js"></script>
+    <script type="text/javascript" src="plugins/jquery-ui-1.11.4/jquery-ui.js"></script>
     <!-- Path to your app js-->
     <script type="text/javascript" src="js/my-app.js"></script>
     <script type="text/javascript">
