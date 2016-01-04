@@ -133,6 +133,8 @@ function addSelling() {
               t.executeSql("INSERT INTO selling_history (name, brand, supplier, descr, pic_url, buy_price, sell_price, qty, sold_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", [name, brand, supplier, descr, pic_url, buy_price, sell_price, qty, sold_date]);              
               outputInventory();
               mainView.router.back();
+          });
+          mydb.transaction(function (t) {
               t.executeSql("INSERT INTO name (name) VALUES (?)", [name]);
               t.executeSql("INSERT INTO brand (name) VALUES (?)", [brand]);
               t.executeSql("INSERT INTO supplier (name) VALUES (?)", [supplier]);
@@ -405,6 +407,8 @@ function editSelling(id) {
               t.executeSql("UPDATE selling_history SET name=?, brand=?, supplier=?, descr=?, pic_url=?, buy_price=?, sell_price=?, qty=?, sold_date=? WHERE id=?", [name, brand, supplier, descr, pic_url, buy_price, sell_price, qty, sold_date, id]);              
               outputInventory();
               mainView.router.back();
+          });
+          mydb.transaction(function (t) {
               t.executeSql("INSERT INTO name (name) VALUES (?)", [name]);
               t.executeSql("INSERT INTO brand (name) VALUES (?)", [brand]);
               t.executeSql("INSERT INTO supplier (name) VALUES (?)", [supplier]);
