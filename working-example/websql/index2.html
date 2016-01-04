@@ -1,0 +1,45 @@
+<style type="text/css">
+    body {
+    font-family: sans-serif;
+    padding: 10px;
+}
+h1 {
+    font-weight: bold;
+}
+label {
+    font-size: small;
+}
+#controls {
+    padding-bottom: 5px;
+    border-bottom: 1px solid #000;
+}
+</style>
+
+<script type="text/javascript">
+    //Test for browser compatibility
+if (window.openDatabase) {
+    //Create the database the parameters are 1. the database name 2.version number 3. a description 4. the size of the database (in bytes) 1024 x 1024 = 1MB
+    var mydb = openDatabase("cars_db", "0.1", "A Database of Cars I Like", 1024 * 1024);
+
+    //create the cars table using SQL for the database using a transaction
+    mydb.transaction(function (t) {
+        t.executeSql("CREATE TABLE IF NOT EXISTS selling_history (id INTEGER PRIMARY KEY ASC, name, brand, supplier, descr, pic_url, buy_price, sell_price, qty, sold_date)");
+    });
+
+    mydb.transaction(function (t) {
+        t.executeSql("INSERT INTO selling_history (name, brand, supplier, descr, pic_url, buy_price, sell_price, qty, sold_date) VALUES ('Name1', 'Brand1', 'Supplier1', 'Descr1', '', 20000, 30000, 9, '2015-01-30')");
+    });
+
+    mydb.transaction(function (t) {
+        t.executeSql("SELECT name, SUM(qty) as sum_qty FROM selling_history WHERE SUBSTR(sold_date,6,2)>='01' GROUP BY name", [], function (transaction, results){
+        	for (i=0; i<results.rows.length; i++) 
+        		alert(results.rows.item(i).name+':::'+results.rows.item(i).sum_qty);
+        });
+    });
+
+
+
+} else {
+    alert("WebSQL is not supported by your browser!");
+}
+</script>
