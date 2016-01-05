@@ -85,32 +85,7 @@
             <!-- Scrollable page content-->
             <div class="page-content">
               <div class="content-block">
-                <div class="content-block-title">Filter</div>
-                <div class="list-block">
-                  <ul>
-                    <li>
-                      <div class="item-content">
-                        <div class="item-inner">
-                          <div class="item-input">
-                            <input type="text" placeholder="Dari tanggal" readonly id="from_date">
-                          </div>
-                        </div>
-                      </div>
-                    </li>
-                    <li>
-                      <div class="item-content">
-                        <div class="item-inner">
-                          <div class="item-input">
-                            <input type="text" placeholder="Sampai tanggal" readonly id="to_date">
-                          </div>
-                        </div>
-                      </div>
-                    </li>
-                  </ul>
-                </div>
-                <!-- <p><a href="#" class="button button-fill color-gray" style="background-color:blue;" onclick="clearFilter();">Kosongkan Filter</a></p> -->
-                <p><a href="#" class="button" onclick="clearFilter();">Kosongkan Filter</a>
-                <br />
+                <p><a href="filterSellingHistory.html" class="button link">Filter</a></p>
                 <div id="welcomeMessage"></div>
                 <div id="sellingHistoryContainer"></div>
                 <p><a href="sell.html" class="button link button-fill color-gray" style="background-color:blue;">Jual</a></p>
@@ -126,29 +101,12 @@
     <!-- Path to your app js-->
     <script type="text/javascript" src="js/my-app.js"></script>
     <script type="text/javascript">
-      var fromDateCal = myApp.calendar({
-          input: '#from_date',
-      });
-      var toDateCal = myApp.calendar({
-          input: '#to_date',
-      });
-      $$('#from_date').change(function() {
-        outputInventoryWithDate(document.getElementById('from_date').value,document.getElementById('to_date').value);
-      });
-      $$('#to_date').change(function() {
-        outputInventoryWithDate(document.getElementById('from_date').value,document.getElementById('to_date').value);
-      });
-      function clearFilter() {
-        document.getElementById('from_date').value = '';
-        fromDateCal = myApp.calendar({
-            input: '#from_date',
-        });
-        document.getElementById('to_date').value = '';
-        toDateCal = myApp.calendar({
-            input: '#to_date',
-        });
-        outputInventory();
-      }
+      // $$('#from_date').change(function() {
+      //   outputInventoryWithDate(document.getElementById('from_date').value,document.getElementById('to_date').value);
+      // });
+      // $$('#to_date').change(function() {
+      //   outputInventoryWithDate(document.getElementById('from_date').value,document.getElementById('to_date').value);
+      // });
     </script>
   </body>
 </html>

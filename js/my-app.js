@@ -18,7 +18,6 @@ var mainView = myApp.addView('.view-main', {
 // Callbacks to run specific code for specific pages, for example for About page:
 myApp.onPageInit('about', function (page) {
     // run createContentPage func after link was clicked
-    myApp.alert('Here comes About page');
     $$('.create-page').on('click', function () {
         createContentPage();
     });
@@ -27,6 +26,7 @@ myApp.onPageInit('about', function (page) {
 myApp.onPageInit('sell', function (page) {
     var calendarDefault = myApp.calendar({
         input: '#sold_date',
+        closeOnSelect: true,
     });
 
     //check to ensure the mydb object has been created
@@ -66,6 +66,55 @@ myApp.onPageInit('sell', function (page) {
     } 
 });
 
+
+
+var fsh_from_sold_dateCal;
+var fsh_to_sold_dateCal;
+myApp.onPageInit('filterSellingHistory', function (page) {
+    fsh_from_sold_dateCal = myApp.calendar({
+        input: '#fsh_from_sold_date',
+        closeOnSelect: true,
+        onClose: function (p, values, displayValues) {
+                    localStorage.fsh_from_sold_date = document.getElementById('fsh_from_sold_date').value;
+                  }
+    });
+    if (!isEmpty(localStorage.fsh_from_sold_date)) {
+      document.getElementById('fsh_from_sold_date').value = localStorage.fsh_from_sold_date;
+    }
+
+    fsh_to_sold_dateCal = myApp.calendar({
+        input: '#fsh_to_sold_date',
+        closeOnSelect: true,
+        onClose: function (p, values, displayValues) {
+                    localStorage.fsh_to_sold_date = document.getElementById('fsh_to_sold_date').value;
+                  }
+    });
+    if (!isEmpty(localStorage.fsh_to_sold_date)) {
+      document.getElementById('fsh_to_sold_date').value = localStorage.fsh_to_sold_date;
+    }
+
+    $('#fsh_name').focusout(function() {
+      localStorage.fsh_name = document.getElementById('fsh_name').value;
+    });
+    if (!isEmpty(localStorage.fsh_name)) {
+      document.getElementById('fsh_name').value = localStorage.fsh_name;
+    }
+
+    $('#fsh_brand').focusout(function() {
+      localStorage.fsh_brand = document.getElementById('fsh_brand').value;
+    });
+    if (!isEmpty(localStorage.fsh_brand)) {
+      document.getElementById('fsh_brand').value = localStorage.fsh_brand;
+    }
+
+    $('#fsh_supplier').focusout(function() {
+      localStorage.fsh_supplier = document.getElementById('fsh_supplier').value;
+    });
+    if (!isEmpty(localStorage.fsh_supplier)) {
+      document.getElementById('fsh_supplier').value = localStorage.fsh_supplier;
+    }
+});
+
 // Generate dynamic page
 var dynamicPageIndex = 0;
 function createContentPage() {
@@ -102,6 +151,7 @@ if (window.openDatabase) {
 
   mydb.transaction(function (t) {
       t.executeSql("CREATE TABLE IF NOT EXISTS selling_history (id INTEGER PRIMARY KEY ASC, name, brand, supplier, descr, pic_url, buy_price, sell_price, qty, sold_date)");
+      // t.executeSql("CREATE TABLE IF NOT EXISTS setting (from_sold_date, to_sold_date, name, brand, supplier)");
       // t.executeSql("INSERT INTO selling_history (name, brand, supplier, descr, pic_url, buy_price, sell_price, qty, sold_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", ['name', 'brand', 'supplier', 'descr', 'pic_url', '10,000', '20,000', '3', '2015-11-12']);
       t.executeSql("CREATE TABLE IF NOT EXISTS name (name PRIMARY KEY)");
       t.executeSql("CREATE TABLE IF NOT EXISTS brand (name PRIMARY KEY)");
@@ -156,8 +206,24 @@ function outputInventory() {
   if (mydb) {
       //Get all the cars from the database with a select statement, set outputCarList as the callback function for the executeSql command
       mydb.transaction(function (t) {
-          t.executeSql("SELECT * FROM selling_history ORDER BY sold_date ASC", [], updateInventoryList);
-          // t.executeSql("SELECT * FROM name", [], showNames);
+          var sqlStr = "SELECT * FROM selling_history WHERE 1 ";
+          if (!isEmpty(localStorage.fsh_from_sold_date)) {
+            sqlStr += "AND sold_date >= '"+localStorage.fsh_from_sold_date+"' ";
+          }
+          if (!isEmpty(localStorage.fsh_to_sold_date)) {
+            sqlStr += "AND sold_date <= '"+localStorage.fsh_to_sold_date+"' ";
+          }
+          if (!isEmpty(localStorage.fsh_name)) {
+            sqlStr += "AND name = '"+localStorage.fsh_name+"' ";
+          }
+          if (!isEmpty(localStorage.fsh_brand)) {
+            sqlStr += "AND brand = '"+localStorage.fsh_brand+"' ";
+          }
+          if (!isEmpty(localStorage.fsh_supplier)) {
+            sqlStr += "AND supplier = '"+localStorage.fsh_supplier+"' ";
+          }
+          sqlStr += 'ORDER BY sold_date ASC';
+          t.executeSql(sqlStr, [], updateInventoryList);
       });
   } else {
       // alert("db not found, your browser does not support web sql!");
@@ -441,29 +507,21 @@ function delSelling(id) {
   }
 }
 
-function showNames (transaction, results) {
-  for (i=0; i<results.rows.length; i++) {
-    myApp.alert(results.rows.item(i).name);
-  }
-  // body...
-}
-
 function updateInventoryList(transaction, results) {
   if (results.rows.length < 1) {
-    var fromDateFilter = document.getElementById('from_date').value;
-    var toDateFilter = document.getElementById('to_date').value;
-    if (fromDateFilter==='' && toDateFilter==='') {
-      document.getElementById('welcomeMessage').innerHTML = '<p>Anda belum mencatat penjualan apapun. Klik tombol di bawah untuk mencatat penjualan.</p>';
-    } else {
-      var theInnerHtml2 = 'Tidak ada data penjualan';
-      if (fromDateFilter!=='') {
-        theInnerHtml2 += ' dari ' + getFormattedDate(fromDateFilter);
-      }
-      if (toDateFilter!=='') {
-        theInnerHtml2 += ' sampai ' + getFormattedDate(toDateFilter);
-      }
-      document.getElementById('welcomeMessage').innerHTML = '<p>'+theInnerHtml2+'.</p>';
-    }
+    // if (isEmpty(localStorage.fsh_from_sold_date) && isEmpty(localStorage.fsh_to_sold_date)) {
+    //   document.getElementById('welcomeMessage').innerHTML = '<p>Anda belum mencatat penjualan apapun. Klik tombol di bawah untuk mencatat penjualan.</p>';
+    // } else {
+    //   var theInnerHtml2 = 'Tidak ada data penjualan';
+    //   if (localStorage.fsh_from_sold_date!=='') {
+    //     theInnerHtml2 += ' dari ' + getFormattedDate(localStorage.fsh_from_sold_date);
+    //   }
+    //   if (localStorage.fsh_to_sold_date!=='') {
+    //     theInnerHtml2 += ' sampai ' + getFormattedDate(localStorage.fsh_to_sold_date);
+    //   }
+    //   document.getElementById('welcomeMessage').innerHTML = '<p>'+theInnerHtml2+'.</p>';
+    // }
+    document.getElementById('welcomeMessage').innerHTML = '<p>Tidak ada data. Silahkan ubah filter atau tambah data penjualan.</p>';
     var sellingHistoryContainer = document.getElementById('sellingHistoryContainer');
     sellingHistoryContainer.innerHTML = '';
   } else {
@@ -683,7 +741,6 @@ function cropAndMovePic(fileUri){
       resOnError
     );
   }, function fail () {
-    // myApp.alert('gagal');
   }, fileUri);
 } 
 
@@ -794,4 +851,26 @@ function getFormattedDate(dateYmd) {
   }
 
   return dayStr+', '+date+' '+monthStr+' '+year;
+}
+
+
+
+function clearFilterSellingHistory() {
+  fsh_from_sold_dateCal.setValue('');
+  fsh_to_sold_dateCal.setValue('');
+  document.getElementById('fsh_name').value = '';
+  document.getElementById('fsh_brand').value = '';
+  document.getElementById('fsh_supplier').value = '';
+
+  localStorage.fsh_from_sold_date = '';
+  localStorage.fsh_to_sold_date = '';
+  localStorage.fsh_name = '';
+  localStorage.fsh_brand = '';
+  localStorage.fsh_supplier = '';
+}
+
+function isEmpty(value) {
+  if (typeof value === 'undefined' || value.trim()==='')
+    return true;
+  return false;
 }
