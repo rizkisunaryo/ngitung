@@ -1,6 +1,6 @@
 // Initialize your app
 var myApp = new Framework7({
-    // swipePanel: 'left',
+    swipePanel: 'left',
     modalTitle: 'Ngitung',
 });
 
@@ -14,6 +14,8 @@ var mainView = myApp.addView('.view-main', {
 });
 
 
+
+var colorArr = ["Black", "Blue", "BlueViolet", "Brown", "BurlyWood", "CadetBlue", "Chartreuse", "Gainsboro", "DarkTurquoise", "Crimson"];
 
 // Callbacks to run specific code for specific pages, for example for About page:
 myApp.onPageInit('about', function (page) {
@@ -66,8 +68,6 @@ myApp.onPageInit('sell', function (page) {
     } 
 });
 
-
-
 var fsh_from_sold_dateCal;
 var fsh_to_sold_dateCal;
 myApp.onPageInit('filterSellingHistory', function (page) {
@@ -113,6 +113,36 @@ myApp.onPageInit('filterSellingHistory', function (page) {
     if (!isEmpty(localStorage.fsh_supplier)) {
       document.getElementById('fsh_supplier').value = localStorage.fsh_supplier;
     }
+});
+
+myApp.onPageInit('pieChart', function (page) {
+  if (mydb) {
+      mydb.transaction(function (t) {
+        t.executeSql("SELECT name, brand, supplier, SUM(qty) as sum_qty FROM selling_history GROUP BY name, brand, supplier ORDER BY sum_qty DESC", [], function (transaction, results) {
+          var pieData = [];
+
+          var iLimit = 10;
+          if (results.rows.length < iLimit) 
+            iLimit = results.rows.length;
+
+          // var ulInnerHtml = '';
+          for (i=0; i<iLimit; i++) {
+            var record = results.rows.item(i);
+            pieData.push({
+              value:record.sum_qty,
+              label:record.brand + ' - ' + record.name + ' - ' + record.supplier,
+              color:colorArr[i]
+            });
+
+            // ulInnerHtml += '<li class="chart" style="color:'+ colorArr[i] +'">'+ record.brand + ' - ' + record.name + ' - ' + record.supplier +'</li>';
+          }
+
+          var ctx = document.getElementById("chart-area").getContext("2d");
+          new Chart(ctx).Pie(pieData);
+          // $$('#pieChart-ul').html(ulInnerHtml);
+        });
+      });
+  } 
 });
 
 // Generate dynamic page
@@ -186,9 +216,12 @@ function addSelling() {
           });
           mydb.transaction(function (t) {
               t.executeSql("INSERT INTO name (name) VALUES (?)", [name]);
+          });
+          mydb.transaction(function (t) {
               t.executeSql("INSERT INTO brand (name) VALUES (?)", [brand]);
+          });
+          mydb.transaction(function (t) {
               t.executeSql("INSERT INTO supplier (name) VALUES (?)", [supplier]);
-              // t.executeSql("INSERT INTO descr (name) VALUES (?)", [descr]);
           });
       } else {
           myApp.alert("Data tidak lengkap!");
@@ -342,7 +375,7 @@ function loadSellEditPage (data) {
     '<div class="navbar">\n' + 
     '  <div class="navbar-inner">\n' + 
     '    <div class="left"><a href="#" class="back link" id="sellBack"> <i class="icon icon-back"></i><span>Back</span></a></div>\n' + 
-    '    <div class="center sliding">Jual</div>\n' + 
+    '    <div class="center sliding">Edit Penjualan</div>\n' + 
     '    <div class="right">\n' + 
     '      <a href="#" class="link icon-only open-panel"> <i class="icon icon-bars"></i></a>\n' + 
     '    </div>\n' + 
@@ -476,9 +509,12 @@ function editSelling(id) {
           });
           mydb.transaction(function (t) {
               t.executeSql("INSERT INTO name (name) VALUES (?)", [name]);
+          });
+          mydb.transaction(function (t) {
               t.executeSql("INSERT INTO brand (name) VALUES (?)", [brand]);
+          });
+          mydb.transaction(function (t) {
               t.executeSql("INSERT INTO supplier (name) VALUES (?)", [supplier]);
-              // t.executeSql("INSERT INTO descr (name) VALUES (?)", [descr]);
           });
       } else {
           myApp.alert("Data tidak lengkap!");
@@ -496,10 +532,6 @@ function delSelling(id) {
         t.executeSql("DELETE FROM selling_history WHERE id=?", [id]);
         outputInventory();
         mainView.router.back();
-        // t.executeSql("INSERT INTO name (name) VALUES (?)", [name]);
-        // t.executeSql("INSERT INTO brand (name) VALUES (?)", [brand]);
-        // t.executeSql("INSERT INTO supplier (name) VALUES (?)", [supplier]);
-        // t.executeSql("INSERT INTO descr (name) VALUES (?)", [descr]);
     });
   } else {
       myApp.alert("Browser Anda tidak mendukung WebSQL!");

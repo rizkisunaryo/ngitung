@@ -31,7 +31,7 @@ if (window.openDatabase) {
     });
 
     mydb.transaction(function (t) {
-        t.executeSql("SELECT name, SUM(qty) as sum_qty FROM selling_history WHERE SUBSTR(sold_date,6,2)>='01' GROUP BY name", [], function (transaction, results){
+        t.executeSql("SELECT name, brand, supplier, SUM(qty) as sum_qty FROM selling_history WHERE SUBSTR(sold_date,6,2)>='01' GROUP BY name, brand, supplier", [], function (transaction, results){
         	for (i=0; i<results.rows.length; i++) 
         		alert(results.rows.item(i).name+':::'+results.rows.item(i).sum_qty);
         });
