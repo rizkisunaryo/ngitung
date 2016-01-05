@@ -35,42 +35,34 @@ myApp.onPageInit('sell', function (page) {
     if (mydb) {
         //Get all the cars from the database with a select statement, set outputCarList as the callback function for the executeSql command
         mydb.transaction(function (t) {
-            t.executeSql("SELECT * FROM name", [], function (transaction, results) {
-              var availableTags = [];
-              for (i=0; i<results.rows.length; i++) 
-                availableTags.push(results.rows.item(i).name);
-              $( "#name" ).autocomplete({
-                delay: 0,
-                source: availableTags
-              });
-            });
-
-            t.executeSql("SELECT * FROM brand", [], function (transaction, results) {
-              var availableTags = [];
-              for (i=0; i<results.rows.length; i++) 
-                availableTags.push(results.rows.item(i).name);
-              $( "#brand" ).autocomplete({
-                delay: 0,
-                source: availableTags
-              });
-            });
-
-            t.executeSql("SELECT * FROM supplier", [], function (transaction, results) {
-              var availableTags = [];
-              for (i=0; i<results.rows.length; i++) 
-                availableTags.push(results.rows.item(i).name);
-              $( "#supplier" ).autocomplete({
-                delay: 0,
-                source: availableTags
-              });
-            });
+            setAutoComplete(t,'name','#name');
+            setAutoComplete(t,'brand','#brand');
+            setAutoComplete(t,'supplier','#supplier');
         });
     } 
 });
 
+function setAutoComplete(t, tableName, selectorLabel) {
+  t.executeSql("SELECT * FROM " + tableName + " ORDER BY name", [], function (transaction, results) {
+    var availableTags = [];
+    for (i=0; i<results.rows.length; i++) 
+      availableTags.push(results.rows.item(i).name);
+    $(selectorLabel).autocomplete({
+      delay: 0,
+      source: availableTags
+    });
+  });
+}
+
 var fsh_from_sold_dateCal;
 var fsh_to_sold_dateCal;
 myApp.onPageInit('filterSellingHistory', function (page) {
+    mydb.transaction(function (t) {
+      setAutoComplete(t,'name','#fsh_name');
+      setAutoComplete(t,'brand','#fsh_brand');
+      setAutoComplete(t,'supplier','#fsh_supplier');
+    });
+
     fsh_from_sold_dateCal = myApp.calendar({
         input: '#fsh_from_sold_date',
         closeOnSelect: true,
