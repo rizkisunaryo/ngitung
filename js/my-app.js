@@ -16,6 +16,34 @@ var mainView = myApp.addView('.view-main', {
 
 
 var colorArr = ["Black", "Blue", "BlueViolet", "Brown", "BurlyWood", "CadetBlue", "Chartreuse", "Gainsboro", "DarkTurquoise", "Crimson"];
+var fsh_from_sold_dateCal;
+var fsh_to_sold_dateCal;
+
+if (window.openDatabase) {
+  var mydb = openDatabase("ngitung", "0.1", "Ngitung DB", 1024 * 1024 * 50);
+
+  mydb.transaction(function (t) {
+      t.executeSql("CREATE TABLE IF NOT EXISTS selling_history (id INTEGER PRIMARY KEY ASC, name, brand, supplier, descr, pic_url, buy_price, sell_price, qty, sold_date)");
+      // t.executeSql("CREATE TABLE IF NOT EXISTS setting (from_sold_date, to_sold_date, name, brand, supplier)");
+      // t.executeSql("INSERT INTO selling_history (name, brand, supplier, descr, pic_url, buy_price, sell_price, qty, sold_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", ['name', 'brand', 'supplier', 'descr', 'pic_url', '10,000', '20,000', '3', '2015-11-12']);
+      t.executeSql("CREATE TABLE IF NOT EXISTS name (name PRIMARY KEY)");
+      t.executeSql("CREATE TABLE IF NOT EXISTS brand (name PRIMARY KEY)");
+      t.executeSql("CREATE TABLE IF NOT EXISTS supplier (name PRIMARY KEY)");
+      // t.executeSql("CREATE TABLE IF NOT EXISTS descr (name PRIMARY KEY)");
+  });
+} else {
+  myApp.alert("Browser Anda tidak mendukung WebSQL!");
+}
+
+
+
+outputInventory();
+
+myApp.onPageInit('index', function (page) {
+    outputInventory();
+});
+
+
 
 // Callbacks to run specific code for specific pages, for example for About page:
 myApp.onPageInit('about', function (page) {
@@ -54,8 +82,6 @@ function setAutoComplete(t, tableName, selectorLabel) {
   });
 }
 
-var fsh_from_sold_dateCal;
-var fsh_to_sold_dateCal;
 myApp.onPageInit('filterSellingHistory', function (page) {
     mydb.transaction(function (t) {
       setAutoComplete(t,'name','#fsh_name');
@@ -164,24 +190,6 @@ function createContentPage() {
         '</div>'
     );
 	return;
-}
-
-
-
-if (window.openDatabase) {
-  var mydb = openDatabase("ngitung", "0.1", "Ngitung DB", 1024 * 1024 * 50);
-
-  mydb.transaction(function (t) {
-      t.executeSql("CREATE TABLE IF NOT EXISTS selling_history (id INTEGER PRIMARY KEY ASC, name, brand, supplier, descr, pic_url, buy_price, sell_price, qty, sold_date)");
-      // t.executeSql("CREATE TABLE IF NOT EXISTS setting (from_sold_date, to_sold_date, name, brand, supplier)");
-      // t.executeSql("INSERT INTO selling_history (name, brand, supplier, descr, pic_url, buy_price, sell_price, qty, sold_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", ['name', 'brand', 'supplier', 'descr', 'pic_url', '10,000', '20,000', '3', '2015-11-12']);
-      t.executeSql("CREATE TABLE IF NOT EXISTS name (name PRIMARY KEY)");
-      t.executeSql("CREATE TABLE IF NOT EXISTS brand (name PRIMARY KEY)");
-      t.executeSql("CREATE TABLE IF NOT EXISTS supplier (name PRIMARY KEY)");
-      // t.executeSql("CREATE TABLE IF NOT EXISTS descr (name PRIMARY KEY)");
-  });
-} else {
-  myApp.alert("Browser Anda tidak mendukung WebSQL!");
 }
 
 function addSelling() {
@@ -624,8 +632,6 @@ function updateInventoryList(transaction, results) {
     });
   }
 }
-
-outputInventory();
 
 
 
