@@ -3,8 +3,8 @@
 <!-- Top Navbar-->
 <div class="navbar">
   <div class="navbar-inner">
-    <div class="left"><a href="#" class="back link"> <i class="icon icon-back"></i><span>Back</span></a></div>
-    <div class="center sliding">Filter Riwayat Penjualan</div>
+    <div class="left"><a href="#" class="back link" onclick="drawPieChart();"> <i class="icon icon-back"></i><span>Back</span></a></div>
+    <div class="center sliding">Filter Penjualan Terbanyak</div>
     <div class="right">
       <a href="#" class="link icon-only open-panel"> <i class="icon icon-bars"></i></a>
     </div>
@@ -12,7 +12,7 @@
 </div>
 <div class="pages">
   <!-- Page, data-page contains page name-->
-  <div data-page="filterSellingHistory" class="page">
+  <div data-page="filterPieChart" class="page">
     <!-- Scrollable page content-->
     <div class="page-content">
       <div class="content-block">
@@ -22,7 +22,7 @@
               <div class="item-content">
                 <div class="item-inner">
                   <div class="item-input">
-                    <input type="text" placeholder="Dari tanggal" readonly id="fsh_from_sold_date" class="fsh">
+                    <input type="text" placeholder="Dari tanggal" readonly id="fpc_from_sold_date" class="fpc">
                   </div>
                 </div>
               </div>
@@ -31,7 +31,7 @@
               <div class="item-content">
                 <div class="item-inner">
                   <div class="item-input">
-                    <input type="text" placeholder="Sampai tanggal" readonly id="fsh_to_sold_date" class="fsh">
+                    <input type="text" placeholder="Sampai tanggal" readonly id="fpc_to_sold_date" class="fpc">
                   </div>
                 </div>
               </div>
@@ -40,7 +40,7 @@
               <div class="item-content">
                 <div class="item-inner">
                   <div class="item-input">
-                    <input type="text" placeholder="Nama barang" id="fsh_name" class="fsh">
+                    <input type="text" placeholder="Nama barang" id="fpc_name" class="fpc">
                   </div>
                 </div>
               </div>
@@ -49,7 +49,7 @@
               <div class="item-content">
                 <div class="item-inner">
                   <div class="item-input">
-                    <input type="text" placeholder="Merk" id="fsh_brand" class="fsh">
+                    <input type="text" placeholder="Merk" id="fpc_brand" class="fpc">
                   </div>
                 </div>
               </div>
@@ -58,14 +58,14 @@
               <div class="item-content">
                 <div class="item-inner">
                   <div class="item-input">
-                    <input type="text" placeholder="Supplier" id="fsh_supplier" class="fsh">
+                    <input type="text" placeholder="Supplier" id="fpc_supplier" class="fpc">
                   </div>
                 </div>
               </div>
             </li>
           </ul>
         </div>
-        <p><a href="#" class="button" onclick="clearFilterSellingHistory();">Kosongkan Filter</a>
+        <p><a href="#" class="button" onclick="clearFilterPieChart();">Kosongkan Filter</a>
       </div>
     </div>
   </div>

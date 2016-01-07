@@ -18,6 +18,9 @@ var mainView = myApp.addView('.view-main', {
 var colorArr = ["Black", "Blue", "BlueViolet", "Brown", "BurlyWood", "CadetBlue", "Chartreuse", "Gainsboro", "DarkTurquoise", "Crimson"];
 var fsh_from_sold_dateCal;
 var fsh_to_sold_dateCal;
+var fpc_from_sold_dateCal;
+var fpc_to_sold_dateCal;
+var pieChartChart;
 
 
 
@@ -42,13 +45,7 @@ if (window.openDatabase) {
   myApp.alert("Browser Anda tidak mendukung WebSQL!");
 }
 
-
-
 outputInventory();
-
-myApp.onPageInit('index', function (page) {
-    outputInventory();
-});
 
 
 
@@ -58,6 +55,10 @@ myApp.onPageInit('about', function (page) {
     $$('.create-page').on('click', function () {
         createContentPage();
     });
+});
+
+myApp.onPageInit('index', function (page) {
+    outputInventory();
 });
 
 myApp.onPageInit('sell', function (page) {
@@ -141,34 +142,61 @@ myApp.onPageInit('filterSellingHistory', function (page) {
 });
 
 myApp.onPageInit('pieChart', function (page) {
-  if (mydb) {
-      mydb.transaction(function (t) {
-        t.executeSql("SELECT name, brand, supplier, SUM(qty) as sum_qty FROM selling_history GROUP BY name, brand, supplier ORDER BY sum_qty DESC", [], function (transaction, results) {
-          var pieData = [];
-
-          var iLimit = 10;
-          if (results.rows.length < iLimit) 
-            iLimit = results.rows.length;
-
-          // var ulInnerHtml = '';
-          for (i=0; i<iLimit; i++) {
-            var record = results.rows.item(i);
-            pieData.push({
-              value:record.sum_qty,
-              label:record.brand + ' - ' + record.name + ' - ' + record.supplier,
-              color:colorArr[i]
-            });
-
-            // ulInnerHtml += '<li class="chart" style="color:'+ colorArr[i] +'">'+ record.brand + ' - ' + record.name + ' - ' + record.supplier +'</li>';
-          }
-
-          var ctx = document.getElementById("chart-area").getContext("2d");
-          new Chart(ctx).Pie(pieData);
-          // $$('#pieChart-ul').html(ulInnerHtml);
-        });
-      });
-  } 
+  drawPieChart();
 });
+
+myApp.onPageInit('filterPieChart', function (page) {
+    mydb.transaction(function (t) {
+      setAutoComplete(t,'name','#fpc_name');
+      setAutoComplete(t,'brand','#fpc_brand');
+      setAutoComplete(t,'supplier','#fpc_supplier');
+    });
+
+    fpc_from_sold_dateCal = myApp.calendar({
+        input: '#fpc_from_sold_date',
+        closeOnSelect: true,
+        onClose: function (p, values, displayValues) {
+                    localStorage.fpc_from_sold_date = document.getElementById('fpc_from_sold_date').value;
+                  }
+    });
+    if (!isEmpty(localStorage.fpc_from_sold_date)) {
+      document.getElementById('fpc_from_sold_date').value = localStorage.fpc_from_sold_date;
+    }
+
+    fpc_to_sold_dateCal = myApp.calendar({
+        input: '#fpc_to_sold_date',
+        closeOnSelect: true,
+        onClose: function (p, values, displayValues) {
+                    localStorage.fpc_to_sold_date = document.getElementById('fpc_to_sold_date').value;
+                  }
+    });
+    if (!isEmpty(localStorage.fpc_to_sold_date)) {
+      document.getElementById('fpc_to_sold_date').value = localStorage.fpc_to_sold_date;
+    }
+
+    $('#fpc_name').focusout(function() {
+      localStorage.fpc_name = document.getElementById('fpc_name').value;
+    });
+    if (!isEmpty(localStorage.fpc_name)) {
+      document.getElementById('fpc_name').value = localStorage.fpc_name;
+    }
+
+    $('#fpc_brand').focusout(function() {
+      localStorage.fpc_brand = document.getElementById('fpc_brand').value;
+    });
+    if (!isEmpty(localStorage.fpc_brand)) {
+      document.getElementById('fpc_brand').value = localStorage.fpc_brand;
+    }
+
+    $('#fpc_supplier').focusout(function() {
+      localStorage.fpc_supplier = document.getElementById('fpc_supplier').value;
+    });
+    if (!isEmpty(localStorage.fpc_supplier)) {
+      document.getElementById('fpc_supplier').value = localStorage.fpc_supplier;
+    }
+});
+
+
 
 // Generate dynamic page
 var dynamicPageIndex = 0;
@@ -198,6 +226,8 @@ function createContentPage() {
     );
 	return;
 }
+
+
 
 function addSelling() {
   //check to ensure the mydb object has been created
@@ -238,8 +268,6 @@ function addSelling() {
       mainView.router.back();
   }
 }
-
-
 
 function outputInventory() {
   //check to ensure the mydb object has been created
@@ -740,7 +768,6 @@ function onFail(message) {
 
 
 
-var photoOriginFolder = '';
 function cropAndMovePic(fileUri){ 
   plugins.crop(function success () {
     filePath = fileUri.replace("file://", ""); 
@@ -906,8 +933,74 @@ function clearFilterSellingHistory() {
   localStorage.fsh_supplier = '';
 }
 
+function clearFilterPieChart() {
+  fpc_from_sold_dateCal.setValue('');
+  fpc_to_sold_dateCal.setValue('');
+  document.getElementById('fpc_name').value = '';
+  document.getElementById('fpc_brand').value = '';
+  document.getElementById('fpc_supplier').value = '';
+
+  localStorage.fpc_from_sold_date = '';
+  localStorage.fpc_to_sold_date = '';
+  localStorage.fpc_name = '';
+  localStorage.fpc_brand = '';
+  localStorage.fpc_supplier = '';
+}
+
 function isEmpty(value) {
   if (typeof value === 'undefined' || value.trim()==='')
     return true;
   return false;
+}
+
+function drawPieChart() {
+  if (mydb) {
+    mydb.transaction(function (t) {
+      var sqlStr = "SELECT name, brand, SUM(qty) as sum_qty FROM selling_history WHERE 1 ";
+      if (!isEmpty(localStorage.fpc_from_sold_date)) {
+        sqlStr += "AND sold_date >= '"+localStorage.fpc_from_sold_date+"' ";
+      }
+      if (!isEmpty(localStorage.fpc_to_sold_date)) {
+        sqlStr += "AND sold_date <= '"+localStorage.fpc_to_sold_date+"' ";
+      }
+      if (!isEmpty(localStorage.fpc_name)) {
+        sqlStr += "AND name = '"+localStorage.fpc_name+"' ";
+      }
+      if (!isEmpty(localStorage.fpc_brand)) {
+        sqlStr += "AND brand = '"+localStorage.fpc_brand+"' ";
+      }
+      if (!isEmpty(localStorage.fpc_supplier)) {
+        sqlStr += "AND supplier = '"+localStorage.fpc_supplier+"' ";
+      }
+      sqlStr += "GROUP BY name, brand ORDER BY sum_qty DESC";
+      // t.executeSql("SELECT name, brand, supplier, SUM(qty) as sum_qty FROM selling_history GROUP BY name, brand, supplier ORDER BY sum_qty DESC", [], function (transaction, results) {
+      t.executeSql(sqlStr, [], function (transaction, results) {
+        var pieData = [];
+
+        var iLimit = 10;
+        if (results.rows.length < iLimit) 
+          iLimit = results.rows.length;
+
+        // var ulInnerHtml = '';
+        for (i=0; i<iLimit; i++) {
+          var record = results.rows.item(i);
+          pieData.push({
+            value:record.sum_qty,
+            // label:record.brand + ' - ' + record.name + ' - ' + record.supplier,
+            label:record.brand + ' - ' + record.name,
+            color:colorArr[i]
+          });
+
+          // ulInnerHtml += '<li class="chart" style="color:'+ colorArr[i] +'">'+ record.brand + ' - ' + record.name + ' - ' + record.supplier +'</li>';
+        }
+
+        var ctx = document.getElementById("chart-area").getContext("2d");
+        if (typeof pieChartChart !== 'undefined') {
+          pieChartChart.destroy();
+        } 
+        pieChartChart = new Chart(ctx).Pie(pieData);
+        // $$('#pieChart-ul').html(ulInnerHtml);
+      });
+    });
+  } 
 }
