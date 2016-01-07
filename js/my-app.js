@@ -26,6 +26,7 @@ var pieChartChart;
 
 document.addEventListener("backbutton", onBackKeyDown, false);
 function onBackKeyDown(e) {
+  alert(mainView.router.back();
   e.preventDefault();
 }
 
