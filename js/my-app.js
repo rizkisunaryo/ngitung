@@ -21,12 +21,26 @@ var fsh_to_sold_dateCal;
 var fpc_from_sold_dateCal;
 var fpc_to_sold_dateCal;
 var pieChartChart;
+var isLeftPanelOpen = 0;
 
 
+
+$$('.panel-left').on('opened', function () {
+  isLeftPanelOpen = 1;
+});
+$$('.panel-left').on('close', function () {
+  isLeftPanelOpen = 0;
+});
 
 document.addEventListener("backbutton", onBackKeyDown, false);
 function onBackKeyDown(e) {
-  alert(mainView.router.back();
+  if (isLeftPanelOpen==1) {
+    myApp.closePanel();
+    isLeftPanelOpen = 0;
+  } else {
+    mainView.router.back();
+  }
+  
   e.preventDefault();
 }
 
