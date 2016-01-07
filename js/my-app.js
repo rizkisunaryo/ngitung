@@ -19,6 +19,13 @@ var colorArr = ["Black", "Blue", "BlueViolet", "Brown", "BurlyWood", "CadetBlue"
 var fsh_from_sold_dateCal;
 var fsh_to_sold_dateCal;
 
+
+
+document.addEventListener("backbutton", onBackKeyDown, false);
+function onBackKeyDown(e) {
+  e.preventDefault();
+}
+
 if (window.openDatabase) {
   var mydb = openDatabase("ngitung", "0.1", "Ngitung DB", 1024 * 1024 * 50);
 
